@@ -11,27 +11,7 @@ K1 = 1
 K2 = 1
 
 
-def dephasage_180(wave):
-    return -1 * wave
-
-
-def gain_db(wave, gain_db):
-    return wave * int(10 ** (gain_db / 10))
-
-
-def egalisateur(wave_passe_bas, wave_passe_bande, wave_passe_haut, wave, t):
-    output = wave_passe_bas + wave_passe_bande + wave_passe_haut
-    hp.timeplt1(t, wave, t, output, "Égalisateur")
-
-
 def passe_bas(wave, t):
-    temp, delay = filtre_passe_bas(t, wave)
-    temp_dephase = dephasage_180(temp)
-    temp_gain = gain_db(temp_dephase, GAIN_PBAS_DB)
-    return temp_gain * K1, delay
-
-
-def filtre_passe_bas(t, wave):
     wc = 2 * np.pi * 700
 
     b1, a1 = signal.butter(2, wc, 'lowpass', analog=True)
@@ -50,16 +30,9 @@ def filtre_passe_bas(t, wave):
     hp.grpdel1(w1, delay, 'Passe-Bas')
 
     # H(s) = 19344425 / s^2 + 6220s + 19344424
-    return temp[1], delay
 
 
 def passe_bande(wave, t):
-    temp, delay, w1 = filtre_passe_bande(t, wave)
-    temp_gain = gain_db(temp, GAIN_PBANDE_DB)
-    return temp_gain * K2, delay, w1
-
-
-def filtre_passe_bande(t, wave):
     wc1 = 2 * np.pi * 1000
     wc2 = 2 * np.pi * 5000
 
@@ -93,18 +66,9 @@ def filtre_passe_bande(t, wave):
     # PHaut: H(s) = s^2 / s^2 + 8885s + 39478417
     # PBas: H(s) = 98696044 / s^2 + 44428s + 986960440
     # PBande: H(s) = 98696044s^2 / s^2 + 53314s + 38963636400000000
-    return temp[1], delay, w1
 
 
 def passe_haut(wave, t):
-    temp, delay = filtre_passe_haut(t, wave)
-    temp_dephase = dephasage_180(temp)
-    temp_gain = gain_db(temp_dephase, GAIN_PHAUT_DB)
-
-    return temp_gain * 1, delay
-
-
-def filtre_passe_haut(t, wave):
     wc = 2 * np.pi * 7000
 
     b1, a1 = signal.butter(2, wc, 'highpass', analog=True)
@@ -123,7 +87,6 @@ def filtre_passe_haut(t, wave):
     hp.grpdel1(w1, delay, 'Passe Haut')
 
     # H(s) = s^2 / s^2 + 62200s + 1934442460
-    return temp[1], delay
 
 
 def main():
@@ -134,17 +97,10 @@ def main():
     w = 2 * np.pi * 2500
     wave = 0.25 * np.sin(w * t)
 
-    wave_passe_bas, delay_passe_bas = passe_bas(wave, t)
-    #wave_passe_bande, delay_passe_bande, w1 = passe_bande(wave, t)
-    #wave_passe_haut, delay_passe_haut = passe_haut(wave, t)
+    #passe_bas(wave, t)
+    #passe_bande(wave, t)
+    passe_haut(wave, t)
 
-    #delay_egalisateur = delay_passe_haut + delay_passe_bas + delay_passe_bande
-
-    #egalisateur(wave_passe_bas, wave_passe_bande, wave_passe_haut, wave, t)
-
-    #w1 = np.logspace(1, 2000, 5000)
-    #hp.timeplt1(t, wave, t, wave_passe_haut, 'Signal Sinus 2.5kHz filtré')
-    #hp.grpdel1(w1, delay_egalisateur, 'Passe Haut')
     plt.show()
 
 
