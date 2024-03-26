@@ -80,8 +80,8 @@ def passe_haut(wave, t):
     mag1, ph1, w1, fig, ax = hp.bodeplot(b1, a1, "Bode Passe-Haut")
     hp.pzmap1(z1, p1, "PZ Passe-Haut")
 
-    temp = signal.lsim((z1, p1, k1), U=wave, T=t)
-    hp.timeplt1(t, wave, temp[0], temp[1], 'Signal Sinus 2.5kHz filtré')
+    temp = signal.lsim((z1, p1, k1 * -1), U=wave, T=t)
+    hp.timeplt1(t, wave, temp[0], temp[1], 'Signal Échelon 0.5ms')
 
     delay = - np.diff(ph1) / np.diff(w1)
     hp.grpdel1(w1, delay, 'Passe Haut')
@@ -97,9 +97,18 @@ def main():
     w = 2 * np.pi * 2500
     wave = 0.25 * np.sin(w * t)
 
+    # Échelon 0.5ms
+    temps_total = 0.001
+    durée = 0.0005
+    temps = np.linspace(0, temps_total, 1000)
+    signal = np.where((temps >= 0) & (temps <= 0.0005), 1, 0)
+    x_t = (1.414 * np.exp(-31100 * temps) * np.cos(31100 * temps + 0.785)) - (1.414 * np.exp(-31100 * (temps - 0.5)) * np.cos(31100 * (temps - 0.5) + 0.785))
+
+    #hp.timeplt1(temps, signal, temps, x_t, 'Signal Sinus 2.5kHz filtré')
+
     #passe_bas(wave, t)
     #passe_bande(wave, t)
-    passe_haut(wave, t)
+    passe_haut(signal, temps)
 
     plt.show()
 
